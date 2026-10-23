@@ -43,6 +43,7 @@ def load_examples(json_path):
 
     return examples
 
+# If scaled this can be moved to its own file
 SYSTEM_PROMPT = (
     "You are an expert in SQLite. Given a database schema, an optional hint, "
     "and a question, write exactly one SQLite query that answers the question, "
