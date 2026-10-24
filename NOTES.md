@@ -23,3 +23,10 @@
 
 ## GRPO reward
 - 1.0 rows match, 0.1 runs but wrong, 0 error or no SQL. Kept small to limit reward hacking.
+
+## Related environments (checked 2026-10-23)
+- verifiers v0.4.0 (Oct 2026) removed the v0 stack; our environment targets v1.
+- sql-single-turn (stelioszach, Apache-2.0, v0): synthetic templated schemas; ordered result-set equality. Source repo archived Jul 2026.
+- skyrl-sql (primeintellect, MIT, v0): multi-turn, SkyRL-SQL protocol; 653 train samples (SynSQL + Spider), Spider eval; reward -1 format / 0 wrong / 1 correct.
+- Neither targets BIRD or v1. Ours: v1, single-turn, BIRD, execution-match reward with failure categories. Cite both.
+- Stretch goal is not novel: multi-turn RL text-to-SQL exists (SkyRL-SQL and its Hub env).
