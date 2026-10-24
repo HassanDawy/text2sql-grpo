@@ -33,6 +33,7 @@ def load_examples(json_path):
             schema_cache[db_id] = get_schema(db_path)
 
         examples.append({
+            "question_id": ex.get("question_id"),
             "question":   ex["question"],
             "evidence":   ex["evidence"],
             "gold_sql":   ex["SQL"],

@@ -16,8 +16,7 @@
 - BIRD headline uses the official set-based comparison; a stricter ORDER BY version is reported separately.
 - BIRD dev is used both for decisions and for reporting, as in the papers; disclosed in the write-up.
 - Databases opened read-only (`mode=ro`), so model SQL can't modify BIRD data.
-- Query timeout: 5 s default, enforced with SQLite's progress handler (`connect(timeout=)` only covers lock waits, not slow queries). Timed-out queries score 0. (Open: confirm 5 s is enough for all gold queries.)
-- Status per example: correct / wrong_rows / no_sql / error / timeout / gold_error.
+- Query timeout: 30 s, enforced with SQLite's progress handler. Gold check on BIRD dev: 1,532/1,534 correct at 5 s; the 2 failures were slow gold queries (q596: 10.0 s, q646: 6.4 s on laptop), not bugs. At 30 s (3× the slowest, extra margin for RunPod), all 1,534 pass. Same timeout for gold and predicted queries.- Status per example: correct / wrong_rows / no_sql / error / timeout / gold_error.
 - Gold query runs first. If it fails, the example is marked gold_error: excluded from accuracy, skipped in GRPO, and investigated if more than one or two.
 - Row comparison is set-based, so `1` and `1.0` count as equal.
 - False-positive example: on BIRD dev q0, `SELECT 1` matches the gold answer (1.0). A concrete case of execution accuracy rewarding a meaningless query.

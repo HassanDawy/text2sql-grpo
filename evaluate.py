@@ -19,7 +19,7 @@ def extract_sql(text):
         return None
     return match.group(1).strip()
 
-def execute_sql(db_path, sql, timeout=5.0):
+def execute_sql(db_path, sql, timeout=30.0):
     uri = Path(db_path).resolve().as_uri() + "?mode=ro"   # read-only
     conn = sqlite3.connect(uri, uri=True)
 
@@ -60,7 +60,7 @@ REWARDS = {
     "timeout":    0.0,
 }
 
-def evaluate_one(model_output, example,timeout=5.0):
+def evaluate_one(model_output, example,timeout=30.0):
     # Extract
     pred_sql = extract_sql(model_output)
     if pred_sql is None:
