@@ -14,7 +14,8 @@ def get_db_path(db_id):
     return DB_DIR / db_id / f"{db_id}.sqlite"
 
 def get_schema(db_path):
-    conn = sqlite3.connect(db_path)
+    uri = Path(db_path).resolve().as_uri() + "?mode=ro"
+    conn = sqlite3.connect(uri, uri=True)
     rows = conn.execute(
         "SELECT sql FROM sqlite_master "
         "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
