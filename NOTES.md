@@ -21,6 +21,9 @@
 - Row comparison is set-based, so `1` and `1.0` count as equal.
 - False-positive example: on BIRD dev q0, `SELECT 1` matches the gold answer (1.0). A concrete case of execution accuracy rewarding a meaningless query.
 
+## Scoring engine
+Python 3.8.10, SQLite 3.35.5, for every number in the results table. SQLite 3.49.1 (Python 3.13) returns the same rows but is far slower on some gold queries (q518: 0.1 s → 156 s; q701: 0.2 s → >600 s). On the pod (Linux), Python uses the OS’s SQLite, so if training gold queries hit this, cache gold rows from the laptop.
+
 ## GRPO reward
 - 1.0 rows match, 0.1 runs but wrong, 0 error or no SQL. Kept small to limit reward hacking.
 
