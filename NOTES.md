@@ -24,6 +24,12 @@
 ## GRPO reward
 - 1.0 rows match, 0.1 runs but wrong, 0 error or no SQL. Kept small to limit reward hacking.
 
+## Results
+### GPT-4o-mini (gpt-4o-mini-2024-07-18), BIRD dev (dev_20240627), temperature 0
+- Execution accuracy: 50.5% (774/1,534); simple 57.9%, moderate 39.9%, challenging 36.6%
+- Status: 774 correct, 681 wrong_rows, 74 error, 5 timeout, 0 no_sql, 0 gold_error
+- Cost: $0.26 total, $0.171 per 1,000 queries (avg 930 tokens in, 53 out)
+
 ## Related environments (checked 2026-10-23)
 - verifiers v0.4.0 (Oct 2026) removed the v0 stack; our environment targets v1.
 - sql-single-turn (stelioszach, Apache-2.0, v0): synthetic templated schemas; ordered result-set equality. Source repo archived Jul 2026.
