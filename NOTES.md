@@ -30,6 +30,12 @@
 - Status: 774 correct, 681 wrong_rows, 74 error, 5 timeout, 0 no_sql, 0 gold_error
 - Cost: $0.26 total, $0.171 per 1,000 queries (avg 930 tokens in, 53 out)
 
+### Qwen2.5-Coder-1.5B-Instruct, zero-shot, BIRD dev, temperature 0, max 512 tokens (vLLM)
+- Execution accuracy: 26.5% (406/1,534); simple 33.2%, moderate 17.2%, challenging 13.1%
+- Status: 406 correct, 398 wrong_rows, 718 error, 8 no_sql, 4 timeout, 0 gold_error
+- 29 outputs hit the 512-token cap (all 8 no_sql are among them)
+- Main failure mode: SQL that errors (47%), vs 5% for GPT-4o-mini. Decision: no extraction fallback; format failures are negligible.
+
 ## Related environments (checked 2026-10-23)
 - verifiers v0.4.0 (Oct 2026) removed the v0 stack; our environment targets v1.
 - sql-single-turn (stelioszach, Apache-2.0, v0): synthetic templated schemas; ordered result-set equality. Source repo archived Jul 2026.
