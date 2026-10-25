@@ -1,9 +1,10 @@
 import json
 from pathlib import Path
 import sqlite3
+import os
 
 HERE = Path(__file__).resolve().parent
-BIRD_DIR = HERE / "../../dev/dev_20240627"
+BIRD_DIR = Path(os.environ.get("BIRD_DIR", HERE / "../../dev/dev_20240627"))
 DB_DIR = BIRD_DIR / "dev_databases/dev_databases"
 
 def get_db_path(db_id):
