@@ -1,0 +1,377 @@
+q1048: gold_error | timeout
+q1050: gold_error | timeout
+q1052: gold_error | timeout
+q1103: gold_error | timeout
+q1174: gold_error | timeout
+q1719: gold_error | RIGHT and FULL OUTER JOINs are not currently supported
+q2105: gold_error | timeout
+q2141: gold_error | timeout
+q2142: gold_error | timeout
+q2143: gold_error | timeout
+q2145: gold_error | timeout
+q2462: gold_error | no such column: officer_count
+q2464: gold_error | no such column: grand_jury_disposition
+q2467: gold_error | no such column: T1.grand_jury_disposition
+q2470: gold_error | no such column: T1.grand_jury_disposition
+q2512: gold_error | no such column: Last Updated
+q2513: gold_error | no such column: T1.Last Updated
+q2518: gold_error | no such column: T1.Current Ver
+q2525: gold_error | no such column: Android Ver
+q2558: gold_error | no such column: T1.Last Updated
+q2567: gold_error | no such column: T1.Current Ver
+q3052: gold_error | RIGHT and FULL OUTER JOINs are not currently supported
+q3055: gold_error | RIGHT and FULL OUTER JOINs are not currently supported
+q3147: gold_error | timeout
+q3151: gold_error | timeout
+q3157: gold_error | timeout
+q6297: gold_error | no such column: TitleOfCourtesy
+q6298: gold_error | no such column: ReportsTo
+q6299: gold_error | no such column: HomePhone
+q6300: gold_error | no such column: ReportsTo
+q6301: gold_error | no such column: Salary
+q6302: gold_error | no such column: Salary
+q6303: gold_error | no such column: Country
+q6304: gold_error | no such table: EmployeeTerritories
+q6305: gold_error | no such table: EmployeeTerritories
+q6306: gold_error | no such table: EmployeeTerritories
+q6307: gold_error | no such table: EmployeeTerritories
+q6308: gold_error | no such table: EmployeeTerritories
+q6309: gold_error | no such table: EmployeeTerritories
+q6310: gold_error | no such table: Territories
+q6311: gold_error | no such table: Territories
+q6312: gold_error | no such table: Region
+q6313: gold_error | no such table: EmployeeTerritories
+q6314: gold_error | no such table: Territories
+q6315: gold_error | no such table: Order Details
+q6316: gold_error | no such table: Order Details
+q6317: gold_error | no such table: Order Details
+q6318: gold_error | no such table: Order Details
+q6319: gold_error | no such table: Order Details
+q6320: gold_error | no such table: Order Details
+q6321: gold_error | no such table: Order Details
+q6322: gold_error | no such table: Order Details
+q6323: gold_error | no such column: T2.CompanyName
+q6325: gold_error | no such column: T1.UnitsInStock
+q6326: gold_error | no such column: T1.Discontinued
+q6327: gold_error | no such column: T2.CompanyName
+q6328: gold_error | no such table: EmployeeTerritories
+q6329: gold_error | no such table: Order Details
+q6330: gold_error | no such table: Order Details
+q6331: gold_error | no such table: Order Details
+q6333: gold_error | no such column: HireDate
+q6335: gold_error | no such table: EmployeeTerritories
+q6336: gold_error | no such table: EmployeeTerritories
+q6337: gold_error | no such table: EmployeeTerritories
+q6338: gold_error | no such table: EmployeeTerritories
+q6339: gold_error | no such table: Order Details
+q6340: gold_error | no such table: Order Details
+q6341: gold_error | no such column: T2.CompanyName
+q6342: gold_error | no such column: T2.CompanyName
+q6345: gold_error | no such column: T1.UnitsInStock
+q6346: gold_error | no such column: T1.ReorderLevel
+q6347: gold_error | no such column: T2.CompanyName
+q6350: gold_error | no such table: Territories
+q6351: gold_error | no such table: Territories
+q6352: gold_error | no such column: T2.CompanyName
+q6353: gold_error | no such column: T2.CompanyName
+q6354: gold_error | no such table: Territories
+q6356: gold_error | no such column: Freight
+q6357: gold_error | no such column: Region
+q6358: gold_error | no such column: UnitPrice
+q6360: gold_error | no such column: ReorderLevel
+q6361: gold_error | no such column: Salary
+q6362: gold_error | no such column: Discontinued
+q6363: gold_error | no such column: Salary
+q6364: gold_error | no such column: T2.CompanyName
+q6365: gold_error | no such column: T2.CompanyName
+q6366: gold_error | no such column: T2.CompanyName
+q6367: gold_error | no such column: T2.CompanyName
+q6368: gold_error | no such column: T2.CompanyName
+q6369: gold_error | no such column: T1.Discontinued
+q6370: gold_error | no such table: Order Details
+q6372: gold_error | no such table: Order Details
+q6373: gold_error | no such table: EmployeeTerritories
+q6374: gold_error | no such table: Order Details
+q6375: gold_error | no such table: EmployeeTerritories
+q6376: gold_error | no such table: Territories
+q6377: gold_error | no such table: EmployeeTerritories
+q6378: gold_error | no such column: T1.ReorderLevel
+q6380: gold_error | no such table: Order Details
+q6381: gold_error | no such column: T1.UnitsInStock
+q6382: gold_error | no such table: EmployeeTerritories
+q6383: gold_error | no such column: UnitPrice
+q6384: gold_error | no such table: Customer and Suppliers by City
+q6385: gold_error | no such column: CompanyName
+q6386: gold_error | no such column: HomePhone
+q6387: gold_error | no such table: Invoices
+q6388: gold_error | no such table: Order Details
+q6389: gold_error | no such column: T2.CompanyName
+q6390: gold_error | no such column: T1.CompanyName
+q6391: gold_error | no such table: EmployeeTerritories
+q6392: gold_error | no such column: T2.CompanyName
+q6393: gold_error | no such table: Order Details
+q6394: gold_error | no such column: T2.ShipName
+q6395: gold_error | no such table: Order Details
+q6396: gold_error | no such column: T2.CompanyName
+q6397: gold_error | no such table: EmployeeTerritories
+q6398: gold_error | no such column: Title
+q6399: gold_error | no such table: Order Details
+q6400: gold_error | no such column: T2.CompanyName
+q6401: gold_error | no such column: TitleOfCourtesy
+q6402: gold_error | no such column: ReportsTo
+q6403: gold_error | no such table: Order Details
+q6404: gold_error | no such column: UnitsInStock
+q6405: gold_error | no such column: ReorderLevel
+q6406: gold_error | no such column: T2.Discontinued
+q6407: gold_error | no such table: EmployeeTerritories
+q6408: gold_error | no such column: T1.CompanyName
+q6409: gold_error | no such column: T2.CompanyName
+q6410: gold_error | no such table: EmployeeTerritories
+q6412: gold_error | no such table: Order Details
+q6413: gold_error | no such table: Order Details
+q6414: gold_error | no such table: EmployeeTerritories
+q6415: gold_error | no such table: Order Details
+q6416: gold_error | no such table: Order Details
+q6417: gold_error | no such table: EmployeeTerritories
+q6418: gold_error | no such table: Order Details
+q6419: gold_error | no such column: T1.ShippedDate
+q6420: gold_error | no such column: ContactTitle
+q6421: gold_error | no such column: Region
+q6422: gold_error | no such column: CompanyName
+q6423: gold_error | no such column: Title
+q6424: gold_error | no such column: ContactTitle
+q6426: gold_error | no such column: T2.Freight
+q6427: gold_error | no such column: T2.CompanyName
+q6428: gold_error | no such column: T2.CompanyName
+q6431: gold_error | no such column: T2.CompanyName
+q6432: gold_error | no such column: T2.CompanyName
+q6433: gold_error | no such column: T1.UnitPrice
+q6435: gold_error | no such column: T2.Discontinued
+q6436: gold_error | no such column: T2.CompanyName
+q6437: gold_error | no such column: CompanyName
+q6438: gold_error | no such column: CompanyName
+q6439: gold_error | no such table: Territories
+q6440: gold_error | no such table: Order Details
+q6441: gold_error | no such column: UnitPrice
+q6442: gold_error | no such column: ShipCountry
+q6443: gold_error | no such table: Territories
+q6444: gold_error | no such column: T2.HomePage
+q6445: gold_error | no such column: T2.ShipCity
+q6446: gold_error | no such table: Order Details
+q6447: gold_error | no such column: T2.CompanyName
+q6448: gold_error | no such table: Territories
+q6449: gold_error | no such column: T2.UnitPrice
+q6450: gold_error | no such column: T1.CompanyName
+q6451: gold_error | no such table: Order Details
+q6452: gold_error | no such column: T2.CompanyName
+q6453: gold_error | no such table: EmployeeTerritories
+q6454: gold_error | no such column: T2.ShipCountry
+q6455: gold_error | no such column: T1.Title
+q6456: gold_error | no such column: Country
+q6457: gold_error | no such column: Salary
+q6458: gold_error | no such column: Salary
+q6459: gold_error | no such column: HomePhone
+q6460: gold_error | no such column: Salary
+q6462: gold_error | no such column: T2.ShipCountry
+q6464: gold_error | no such column: T1.Salary
+q6465: gold_error | no such column: T2.CompanyName
+q6466: gold_error | no such column: T1.QuantityPerUnit
+q6467: gold_error | no such column: T1.Discontinued
+q6468: gold_error | no such column: T1.UnitPrice
+q6471: gold_error | no such column: T2.CompanyName
+q6472: gold_error | no such column: T2.ContactTitle
+q6473: gold_error | no such column: T1.UnitsOnOrder
+q6474: gold_error | no such column: T2.CompanyName
+q6475: gold_error | no such column: UnitsInStock
+q6476: gold_error | no such column: Discontinued
+q6477: gold_error | no such column: Address
+q6478: gold_error | no such column: Title
+q6479: gold_error | no such table: Sales Totals by Amount
+q6480: gold_error | no such table: Sales by Category
+q6481: gold_error | no such table: Order Details
+q6482: gold_error | no such table: Order Details
+q6483: gold_error | no such column: T1.ReorderLevel
+q6484: gold_error | no such column: T2.CompanyName
+q6485: gold_error | no such table: EmployeeTerritories
+q6486: gold_error | no such table: EmployeeTerritories
+q6487: gold_error | no such column: T2.CompanyName
+q6488: gold_error | no such column: T2.ShipCountry
+q6489: gold_error | no such table: Order Details
+q6490: gold_error | no such column: T1.UnitPrice
+q6491: gold_error | no such table: EmployeeTerritories
+q6492: gold_error | no such column: T1.CompanyName
+q6493: gold_error | no such table: Order Details
+q6494: gold_error | no such table: Order Details
+q6496: gold_error | no such column: T2.CompanyName
+q6497: gold_error | no such column: T2.CompanyName
+q6498: gold_error | no such column: T1.UnitPrice
+q6499: gold_error | no such table: Territories
+q6500: gold_error | no such table: Territories
+q6501: gold_error | no such table: Territories
+q6503: gold_error | no such column: Title
+q6504: gold_error | no such column: Salary
+q6505: gold_error | no such column: Title
+q6507: gold_error | no such column: T1.CompanyName
+q6509: gold_error | no such column: T1.CompanyName
+q6510: gold_error | no such column: T2.ShippedDate
+q6511: gold_error | no such column: T1.CompanyName
+q6512: gold_error | no such column: T1.CompanyName
+q6513: gold_error | no such column: ReportsTo
+q6515: gold_error | no such column: ReportsTo
+q6517: gold_error | no such column: Salary
+q6518: gold_error | no such column: YEAR
+q6519: gold_error | no such table: Order Details
+q6520: gold_error | no such column: T1.Discontinued
+q6521: gold_error | no such table: Order Details
+q6522: gold_error | no such table: Order Details
+q6523: gold_error | no such column: T1.ShipVia
+q6524: gold_error | no such column: T2.CompanyName
+q6525: gold_error | no such table: Territories
+q6526: gold_error | no such column: T2.CompanyName
+q6527: gold_error | no such table: EmployeeTerritories
+q6528: gold_error | no such column: T2.CompanyName
+q6529: gold_error | no such table: Order Details
+q6530: gold_error | no such table: Order Details
+q6531: gold_error | no such table: Order Details
+q6532: gold_error | no such table: Order Details
+q6533: gold_error | no such column: ShipCountry
+q6535: gold_error | no such table: Order Details
+q6536: gold_error | no such table: EmployeeTerritories
+q6537: gold_error | no such column: CompanyName
+q6538: gold_error | no such column: YEAR
+q6539: gold_error | no such column: CompanyName
+q6540: gold_error | no such column: TitleOfCourtesy
+q6541: gold_error | no such column: CompanyName
+q6542: gold_error | no such column: Title
+q6543: gold_error | no such column: CompanyName
+q6544: gold_error | no such column: UnitsInStock
+q6545: gold_error | no such column: T2.ReorderLevel
+q6546: gold_error | no such column: T2.CompanyName
+q6547: gold_error | no such column: T2.ContactTitle
+q6548: gold_error | no such table: EmployeeTerritories
+q6550: gold_error | no such table: Order Details
+q6551: gold_error | no such column: T2.ReorderLevel
+q6553: gold_error | no such table: Order Details
+q6554: gold_error | no such table: Order Details
+q6555: gold_error | no such column: T1.Title
+q6556: gold_error | no such table: Territories
+q6557: gold_error | no such table: Order Details
+q6558: gold_error | no such table: Order Details
+q6559: gold_error | no such column: T1.UnitsInStock
+q6560: gold_error | no such column: T2.Discontinued
+q6561: gold_error | no such table: Order Details
+q6562: gold_error | no such table: Order Details
+q6563: gold_error | no such column: T1.ContactTitle
+q6564: gold_error | no such column: T2.CompanyName
+q6565: gold_error | no such table: Order Details
+q6566: gold_error | no such table: Order Details
+q6567: gold_error | no such column: T2.ReorderLevel
+q6568: gold_error | no such column: UnitsInStock
+q6569: gold_error | no such column: T2.UnitPrice
+q6570: gold_error | no such table: Order Details
+q6571: gold_error | no such table: Territories
+q6572: gold_error | no such table: Order Details
+q6573: gold_error | no such column: Discontinued
+q6575: gold_error | no such column: T1.CompanyName
+q6576: gold_error | no such table: Order Details
+q6577: gold_error | no such table: Order Details
+q6578: gold_error | no such table: Order Details
+q6579: gold_error | no such column: Salary
+q6581: gold_error | no such column: Discontinued
+q6582: gold_error | no such column: CompanyName
+q6584: gold_error | no such column: T2.ShipCountry
+q6586: gold_error | no such column: Phone
+q6587: gold_error | no such column: Fax
+q6588: gold_error | no such column: CompanyName
+q6589: gold_error | no such column: CompanyName
+q6590: gold_error | no such column: CompanyName
+q6591: gold_error | no such column: T2.CompanyName
+q6592: gold_error | no such column: T2.CompanyName
+q6593: gold_error | no such column: T2.CompanyName
+q6594: gold_error | no such column: T2.CompanyName
+q6595: gold_error | no such column: T1.CompanyName
+q6596: gold_error | no such column: T2.CompanyName
+q6597: gold_error | no such column: T1.UnitsOnOrder
+q6598: gold_error | no such column: T1.UnitPrice
+q6599: gold_error | no such column: T2.CompanyName
+q6600: gold_error | no such table: Order Details
+q6601: gold_error | no such column: T2.UnitsInStock
+q6602: gold_error | no such table: Order Details
+q6603: gold_error | no such table: Order Details
+q6604: gold_error | no such column: Title
+q6605: gold_error | no such column: CompanyName
+q6606: gold_error | no such column: Address
+q6607: gold_error | no such column: ShipAddress
+q6609: gold_error | no such column: T2.CompanyName
+q6610: gold_error | no such table: EmployeeTerritories
+q6611: gold_error | no such table: EmployeeTerritories
+q6612: gold_error | no such column: T2.CompanyName
+q6615: gold_error | no such column: T1.CompanyName
+q6616: gold_error | no such column: T2.CompanyName
+q6617: gold_error | no such column: T1.UnitPrice
+q6618: gold_error | no such table: Order Details
+q6619: gold_error | no such column: T1.ShipCountry
+q6620: gold_error | no such table: Territories
+q6621: gold_error | no such table: Territories
+q6623: gold_error | no such column: CompanyName
+q6624: gold_error | no such column: Country
+q6625: gold_error | no such column: Salary
+q6626: gold_error | no such column: T2.CompanyName
+q6627: gold_error | no such table: Order Details
+q6628: gold_error | no such column: T1.Title
+q6629: gold_error | no such table: Order Details
+q6630: gold_error | no such table: Order Details
+q6631: gold_error | no such table: Order Details
+q6632: gold_error | no such table: Order Details
+q6633: gold_error | no such table: EmployeeTerritories
+q6634: gold_error | no such table: Order Details
+q6635: gold_error | no such table: Order Details
+q6636: gold_error | no such table: Order Details
+q6638: gold_error | no such column: CompanyName
+q6639: gold_error | no such column: Title
+q6640: gold_error | no such column: T3.CompanyName
+q6641: gold_error | no such column: T2.CompanyName
+q6642: gold_error | no such table: EmployeeTerritories
+q6643: gold_error | no such table: Territories
+q6645: gold_error | no such table: Territories
+q6646: gold_error | no such table: EmployeeTerritories
+q6647: gold_error | no such table: EmployeeTerritories
+q6648: gold_error | no such column: T1.Title
+q6649: gold_error | no such table: Order Details
+q6650: gold_error | no such table: Order Details
+q6651: gold_error | no such table: Order Details
+q6652: gold_error | no such column: T1.CompanyName
+q6654: gold_error | no such column: Title
+q6657: gold_error | no such column: T1.City
+q6658: gold_error | no such column: T1.Country
+q6659: gold_error | no such column: T1.Title
+q6660: gold_error | no such column: T1.Phone
+q6661: gold_error | no such column: T1.Region
+q6662: gold_error | no such column: T1.Salary
+q6663: gold_error | no such column: T2.ShippedDate
+q6664: gold_error | no such column: T1.HireDate
+q6665: gold_error | no such column: T1.ReportsTo
+q6667: gold_error | no such column: T2.CompanyName
+q6668: gold_error | no such column: T2.CompanyName
+q6669: gold_error | no such column: T1.ShipVia
+q6720: gold_error | timeout
+q6771: gold_error | timeout
+q6775: gold_error | timeout
+q6776: gold_error | timeout
+q6797: gold_error | timeout
+q6836: gold_error | timeout
+q7122: gold_error | no such table: PersonPhone
+q7129: gold_error | no such table: PersonPhone
+q7172: gold_error | no such table: PersonPhone
+q7173: gold_error | no such table: PersonPhone
+q7178: gold_error | no such table: PersonPhone
+q7218: gold_error | no such table: PersonPhone
+q7227: gold_error | no such table: PersonPhone
+q7325: gold_error | no such table: PersonPhone
+q7409: gold_error | no such table: PersonPhone
+q7438: gold_error | no such table: PersonPhone
+q7689: gold_error | RIGHT and FULL OUTER JOINs are not currently supported
+q8994: gold_error | timeout
+q8997: gold_error | timeout
+q9001: gold_error | timeout
+q9002: gold_error | timeout
