@@ -27,6 +27,6 @@ with open(OUT_PATH, "w") as f:
             "output": gen.text,
             'finish_reason': gen.finish_reason,
             "tokens_in": len(out.prompt_token_ids),
-            "tokens_out": len(gen.tokens_id),
+            "tokens_out": len(gen.token_ids),
         }) + "\n")
 print(f'Wrote {len(outputs)} outputs to {OUT_PATH}')
