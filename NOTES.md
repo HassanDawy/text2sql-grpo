@@ -39,6 +39,10 @@ Python 3.8.10, SQLite 3.35.5, for every number in the results table. SQLite 3.49
 - 29 outputs hit the 512-token cap (all 8 no_sql are among them)
 - Main failure mode: SQL that errors (47%), vs 5% for GPT-4o-mini. Decision: no extraction fallback; format failures are negligible.
 
+## Analysis
+### Zero-shot Qwen error analysis (dev)
+718 errors; 621 (86%) are no such column. Of those: 556 reference a real column through the wrong table alias, 41 use a wrong or invented name (mostly near-misses), 22 rewrite awkward names in snake_case (e.g. FRPM_Count for FRPM Count (K-12)), 2 miss quotes. Other errors: 28 no such function, 14 ambiguous column, 8 no such table, ~30 syntax. Takeaway: schema grounding (which table owns which column) is the main failure, not SQL syntax. Re-run on SFT outputs to see what changes.
+
 ## Related environments (checked 2026-10-23)
 - verifiers v0.4.0 (Oct 2026) removed the v0 stack; our environment targets v1.
 - sql-single-turn (stelioszach, Apache-2.0, v0): synthetic templated schemas; ordered result-set equality. Source repo archived Jul 2026.
