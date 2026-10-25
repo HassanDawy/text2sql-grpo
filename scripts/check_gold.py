@@ -8,8 +8,8 @@
 import time
 from collections import Counter
 
-from data import load_examples, BIRD_DIR
-from evaluate import evaluate_one
+from text2sql.data import load_examples, BIRD_DIR
+from text2sql.evaluate import evaluate_one
 
 examples = load_examples(BIRD_DIR / 'dev.json')
 

@@ -9,7 +9,7 @@ Steps for execution evaluator:
 import time
 import re
 import sqlite3
-from data import get_db_path
+from text2sql.data import get_db_path
 from pathlib import Path
 
 
@@ -91,7 +91,7 @@ def evaluate_one(model_output, example,timeout=30.0):
     
 
 if __name__ == "__main__":
-    from data import load_examples, BIRD_DIR 
+    from text2sql.data import load_examples, BIRD_DIR 
     examples = load_examples(BIRD_DIR / 'dev.json')
     db = get_db_path("california_schools")
     print(execute_sql(db, "SELECT COUNT(*) FROM schools"))           # rows, None

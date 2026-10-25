@@ -2,8 +2,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from data import load_examples, BIRD_DIR
-from evaluate import evaluate_one
+from text2sql.data import load_examples, BIRD_DIR
+from text2sql.evaluate import evaluate_one
 
 HERE = Path(__file__).resolve().parent
 RAW_PATH = HERE / "results" / "qwen_zeroshot_dev_raw.jsonl"

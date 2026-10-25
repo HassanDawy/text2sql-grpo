@@ -1,7 +1,7 @@
 # Baseline models evaluation
 
-from data import load_examples, BIRD_DIR, build_messages
-from evaluate import evaluate_one
+from text2sql.data import load_examples, BIRD_DIR, build_messages
+from text2sql.evaluate import evaluate_one
 
 from collections import Counter
 from pathlib import Path
@@ -15,8 +15,8 @@ MODEL = "gpt-4o-mini-2024-07-18"
 PRICE_IN = 0.15 / 1_000_000
 PRICE_OUT = 0.60 / 1_000_000
 
-HERE = Path(__file__).resolve().parent
-OUT_PATH = HERE / 'results' / 'gpt4o_mini_dev.jsonl'
+ROOT = Path(__file__).resolve().parents[1]
+OUT_PATH = ROOT / 'results' / 'gpt4o_mini_dev.jsonl'
 
 def call_model(client, messages, retries=3):
     #Call API, adding retrying if we get temp failures - increasing wait time on each retry

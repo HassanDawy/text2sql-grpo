@@ -3,7 +3,7 @@ from pathlib import Path
 
 from vllm import LLM, SamplingParams
 
-from data import BIRD_DIR, load_examples, build_messages
+from text2sql.data import BIRD_DIR, load_examples, build_messages
 
 MODEL = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 HERE = Path(__file__).resolve().parent
