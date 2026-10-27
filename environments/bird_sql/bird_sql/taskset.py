@@ -82,10 +82,3 @@ class BirdSqlTaskset(vf.Taskset[BirdSqlTask, BirdSqlConfig]):
             )
             for ex in examples
         ]
-
-
-        raise NotImplementedError(
-            "Return this taskset's tasks, e.g. "
-            "[BirdSqlTask(BirdSqlData(prompt=...), self.config.task) "
-            "for i in range(self.config.num_tasks)]."
-        )
