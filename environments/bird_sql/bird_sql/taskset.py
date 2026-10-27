@@ -1,8 +1,20 @@
 import verifiers.v1 as vf
 import asyncio
 
-from text2sql.data import get_db_path, TRAIN_DB_DIR
+from text2sql.data import get_db_path, load_examples, build_messages, TRAIN_DB_DIR, HERE, BIRD_DIR, BIRD_TRAIN_DIR
 from text2sql.evaluate import evaluate_one
+
+from pathlib import Path
+
+REPO_ROOT = HERE.parent
+
+def load_failed_ids(split): 
+    path = REPO_ROOT / 'results' / f'check_gold_{split}_failures.txt'
+    if not path.exists():
+        return set()
+    with open(path) as f:
+        # each line looks like "q123: gold_error | ..."
+        return {int(line.split(':')[0][1:]) for line in f if line.strip()}
 
 def resolve_db_path(db_id):
     path = get_db_path(db_id)
@@ -35,12 +47,43 @@ class BirdSqlTask(vf.Task[BirdSqlData]):
         return result['reward']
 
 class BirdSqlConfig(vf.TasksetConfig):
-    num_tasks: int = 5
+    split: str = 'dev'
+    num_tasks: int | None = None
     """How many tasks to build."""
+
 
 
 class BirdSqlTaskset(vf.Taskset[BirdSqlTask, BirdSqlConfig]):
     def load(self) -> list[BirdSqlTask]:
+        split = self.config.split
+        if split == 'dev':
+            examples = load_examples(BIRD_DIR / 'dev.json')
+        elif split == 'train': 
+            examples = load_examples(BIRD_TRAIN_DIR / 'train.json', TRAIN_DB_DIR)
+        else:
+            raise ValueError(f'Unknown split: {split}')
+
+        failed = load_failed_ids(split)
+        examples = [ex for ex in examples if ex['question_id'] not in failed]
+
+        if self.config.num_tasks is not None:
+            examples = examples[: self.config.num_tasks]
+
+        return [
+            BirdSqlTask(
+                BirdSqlData(
+                    prompt=build_messages(ex),
+                    question_id=ex['question_id'],
+                    db_id=Path(ex['db_path']).stem,
+                    gold_sql=ex['gold_sql'],
+                    difficulty=ex['difficulty'],
+                ),
+                self.config.task,
+            )
+            for ex in examples
+        ]
+
+
         raise NotImplementedError(
             "Return this taskset's tasks, e.g. "
             "[BirdSqlTask(BirdSqlData(prompt=...), self.config.task) "
