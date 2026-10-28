@@ -5,9 +5,16 @@ from pathlib import Path
 from text2sql.data import load_examples, BIRD_DIR
 from text2sql.evaluate import evaluate_one
 
-HERE = Path(__file__).resolve().parent
-RAW_PATH = HERE / "results" / "qwen_zeroshot_dev_raw.jsonl"
-SCORED_PATH = HERE / "results" / "qwen_zeroshot_dev.jsonl"
+import argparse
+
+ROOT = Path(__file__).resolve().parents[1]
+
+p = argparse.ArgumentParser()
+p.add_argument("--name", default="zeroshot")
+args = p.parse_args()
+
+RAW_PATH = ROOT / "results" / f"qwen_{args.name}_dev_raw.jsonl"
+SCORED_PATH = ROOT / "results" / f"qwen_{args.name}_dev.jsonl"
 
 examples = load_examples(BIRD_DIR / "dev.json")
 by_id = {ex["question_id"]: ex for ex in examples}
