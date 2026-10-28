@@ -168,3 +168,4 @@
 - Count empty and single-0/1 gold answers on train (before GRPO).
 - End-to-end `vf-eval` run (Week 4).
 - Make the environment installable without the local `text2sql` package (Week 4).
+- SLM-SQL reports Qwen2.5-Coder-1.5B zero-shot 46.81% vs our 26.5% (SFT: 54.26% vs 44.4%). Find their prompt/schema format and explain the gap before the write-up. Compare final results to their SFT+RL (61.95%), not CSC-SQL (67.08%).
