@@ -12,12 +12,16 @@ OUT_DIR = Path("/workspace/sft_data")
 MODEL = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
 VAL_SIZE = 300
 SEED = 0
+EXCLUDE_DBS = {"works_cycles"}   # ~6.7k-token schema; see NOTES
 
 # 1. Load train and drop the broken examples (377)
 examples = load_examples(BIRD_TRAIN_DIR / "train.json", TRAIN_DB_DIR)
 failed = load_failed_ids("train")
 examples = [ex for ex in examples if ex["question_id"] not in failed]
 assert len(examples) == 9051, len(examples)
+before = len(examples)
+examples = [ex for ex in examples if Path(ex["db_path"]).stem not in EXCLUDE_DBS]
+print(f"dropped {before - len(examples)} examples from {sorted(EXCLUDE_DBS)}")
 
 # 2. Prompt v1 + gold SQL as the assistant answer
 rows = [
@@ -53,3 +57,9 @@ print(f"tokens: mean {sum(lengths) / n:.0f} | p95 {lengths[int(n * 0.95)]} "
       f"| p99 {lengths[int(n * 0.99)]} | max {lengths[-1]}")
 for cap in [2048, 3072, 4096]:
     print(f"  over {cap}: {sum(x > cap for x in lengths)}")
+
+from text2sql.data import BIRD_DIR
+dev = load_examples(BIRD_DIR / "dev.json")
+dev_lengths = [len(tok(tok.apply_chat_template(build_messages(ex), tokenize=False))["input_ids"])
+               for ex in dev]
+print(f"dev prompt tokens: max {max(dev_lengths)}")
