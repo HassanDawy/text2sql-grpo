@@ -22,10 +22,12 @@ All models use the same prompt and greedy decoding (temperature 0).
 | --- | --- | --- | --- | --- | --- |
 | GPT-4o-mini (2024-07-18), zero-shot | 50.5% | 57.9% | 39.9% | 36.6% | $0.17 |
 | Qwen2.5-Coder-1.5B-Instruct, zero-shot | 26.5% | 33.2% | 17.2% | 13.1% | pending |
-| + SFT (LoRA) | — | | | | |
+| + SFT (LoRA r16, 8.3k BIRD train examples) | 44.4% | 51.8% | 32.5% | 35.2% | pending |
 | + GRPO | — | | | | |
 
-The zero-shot Qwen model's main failure mode is SQL that doesn't run (47% of answers, vs 5% for GPT-4o-mini), rather than SQL that runs but answers the wrong question.
+The zero-shot Qwen model's main failure mode is SQL that doesn't run (47% of answers, vs 5% for GPT-4o-mini), mostly columns referenced through the wrong table. SFT cuts those errors by 73% (718 → 195) and lifts accuracy by 17.9 points, reaching 88% of GPT-4o-mini. Most remaining failures are SQL that runs but returns the wrong rows, which is what GRPO's execution reward targets.
+
+The challenging split is small (145 questions, about ±8 points), so its numbers are noisy.
 
 ## Related environments
 
