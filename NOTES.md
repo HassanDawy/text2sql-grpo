@@ -67,6 +67,15 @@
 - 29 outputs hit the 512-token cap (all 8 no_sql are among them)
 - Main failure mode: SQL that errors (47%), vs 5% for GPT-4o-mini.
 
+### Qwen2.5-Coder-1.5B-Instruct, SFT (LoRA r16), BIRD dev, temperature 0, max 512 tokens (vLLM)
+- Execution accuracy: 44.4% (681/1,534); simple 51.8%, moderate 32.5%, challenging 35.2%
+- Status: 681 correct, 658 wrong_rows, 195 error, 0 no_sql, 0 timeout, 0 gold_error
+- 0 outputs hit the 512-token cap
+- vs zero-shot: +17.9 points; errors 718 → 195 (−73%); wrong_rows 398 → 658 (queries now run but some have wrong logic)
+- 88% of GPT-4o-mini's accuracy (44.4 / 50.5)
+- Challenging > moderate is likely noise (n = 145, about ±8 points)
+- Same generation settings as zero-shot; model = adapter merged into base (scripts/merge_lora.py)
+
 ## 6. Analysis
 
 ### Zero-shot Qwen error analysis (dev)
@@ -88,14 +97,21 @@
 - Random split (seed 0): 8,287 train / 300 val. Val shares databases with train, so it's for overfitting checks only, never for dev-style claims. Dev is never used for training or checkpoint selection.
 - Tokens (prompt + answer): mean 857, p95 2,821, max 3,124. Dev prompt max: 2,209.
 
-### Config (planned, before first run)
-- LoRA: r 16, alpha 32, all linear layers.
+### Config (run 1: sft-lora-r16)- LoRA: r 16, alpha 32, all linear layers.
 - Learning rate 2e-4, 2 epochs.
-- Batch: 4 per step × 4 gradient accumulation = 16 effective.
+- Batch: 2 per step × 8 gradient accumulation = 16 effective (planned 4 × 4; halved per-step batch to limit memory from the 151k-vocabulary logits).
 - max_length 4096 (no truncation), loss on the completion only, no packing.
 - Gradient checkpointing, bf16.
 - Tracking: Weights & Biases (key in repo `.env`, gitignored).
 - Stack on pod: torch 2.14.1, transformers 5.21.0, trl 1.16.0, peft 0.21.2.
+
+### Training run 1 (sft-lora-r16)
+- Smoke test first (`--smoke`): 5 steps on the 40 longest examples; peak GPU memory 5.5 GB; trainable params 18.5M (1.18%).
+- Verified loss is on the answer only: decoded labels contain only the ```sql answer.
+- 1,036 steps, 66 min on an RTX 4090 (~3.8 s/step).
+- Eval loss: 0.177 (step 100) → 0.128 (final), flat after step 900; no overfitting. Used `final`.
+- Adapter: /workspace/checkpoints/sft_lora_r16/final; merged model: /workspace/models/sft_lora_r16_merged.
+- W&B project text2sql-grpo, run sft-lora-r16.
 
 ## 8. GRPO reward and reward-hacking risks
 - Reward: 1.0 rows match, 0.1 runs but wrong, 0 error or no SQL. Kept small to limit reward hacking.
@@ -143,8 +159,12 @@
 - Run long jobs in tmux (detach: Ctrl+B, D; reattach: `tmux attach -t <name>`).
 - git push needs a GitHub fine-grained token.
 - Generate on GPU, score on laptop. Test scripts on `[:5]` first.
+- The 100 GB volume filled up when installing vLLM ("Disk quota exceeded"). Deleted the BIRD zip files (all already extracted) to free space; use `pip install --no-cache-dir`.
+- vLLM lives in its own venv (/workspace/venv-vllm) because it pins its own PyTorch; training stays in /workspace/venv.
+- `deactivate` before deleting an active venv, then `hash -r`.
 
 ## 13. Open items
+- Week 2: look at 20 SFT failures by hand; rerun scratch/column_errors.py on results/qwen_sft_dev.jsonl.
 - Count empty and single-0/1 gold answers on train (before GRPO).
 - End-to-end `vf-eval` run (Week 4).
 - Make the environment installable without the local `text2sql` package (Week 4).
