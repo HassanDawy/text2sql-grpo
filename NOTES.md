@@ -146,7 +146,8 @@
   - total: 618 (7.2%). Counts are on the pool before the train/val split.
   - Errors: 375 (385 including works_cycles) vs 377 in check_gold; the ~8 extra are likely queries near the 30 s timeout.
 - Interpretation: `SELECT 1` everywhere would average ~0.13 reward (3.5% correct + 0.1 elsewhere), far below honest answers, so global hacking is unlikely. The risk is local: on uncertain yes/no or "how many" questions a trivial answer can win, and with 0.1 for wrong_rows any query that runs earns at least as much as an honest attempt that errors.
-- Reward decision: pending. Options: (a) drop the 0.1, (b) drop the 618 trivial-gold questions from GRPO train only, (c) both. Dev stays untouched either way.
+- Reward decision (2026-10-29): GRPO reward = 1.0 if rows match, 0 otherwise (option a). Dropped the 0.1 for wrong_rows: it made any runnable query at least as good as an honest attempt that errors. Kept the 618 trivial-gold questions: they're legitimate questions with real 0/1/empty answers, and removing them would bias training against those answers. Matches SLM-SQL (no partial credit for wrong rows; no format reward needed since SFT has 0 no_sql). Cost: all-wrong groups give no signal; acceptable since SFT errors are 13%. Safety net: monitor the share of trivial completions (`SELECT 1`, empty results) during training.
+- `evaluate_one` stays unchanged (statuses still drive reporting); the GRPO reward lives in `text2sql/reward.py`.
 
 ## 9. verifiers environment (`environments/bird_sql`)
 - verifiers v1 does not run on native Windows (imports `fcntl`). Develop and test on the pod.
