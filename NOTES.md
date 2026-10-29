@@ -88,6 +88,27 @@
 - Takeaway: schema grounding (which table owns which column) is the main failure, not SQL syntax.
 - Re-run `scratch/column_errors.py` on SFT outputs to see what changes.
 
+### SFT error analysis (dev)
+- 195 errors: 171 no such column, 13 no such table, 8 near "order" (likely an unquoted table named `order`), 2 no such function, 1 other.
+- no such column breakdown (zero-shot → SFT): wrong table 556 → 150, wrong/invented name 41 → 14, mangled name 22 → 7, missing quotes 2 → 0.
+- SFT cut every category by ~70% but didn't change the mix: wrong-table mistakes are still 88% of column errors.
+- no such function 28 → 2 (stopped using MySQL-only functions).
+
+### SFT: 20 wrong_rows failures by hand (random, seed 0)
+- 9 benchmark issues (model arguably right): 5 hint contradicts gold, 2 gold selects unrequested columns, 2 gold logic wrong/questionable (e.g. q1247: OR/AND precedence bug in gold).
+- 9 model mistakes: 4 schema/join, 3 ignored hint, 1 wrong aggregation, 1 date format (stored with time).
+- 2 ambiguous questions.
+- n = 20, so no percentage claims. Takeaway: part of wrong_rows is benchmark noise; the model sometimes loses by following hints literally. Same noise exists in train, so it's also GRPO reward noise.
+- Script: scratch/sft_failures.py; labeled file: scratch/sft_failures.md.
+
+### Comparison with SLM-SQL (paper setup, read 2026-10-28)
+- SLM-SQL Qwen2.5-Coder-1.5B on BIRD dev: zero-shot 46.81, SFT 54.26, SFT+RL 61.95, +CSC-SQL 67.08. Ours: zero-shot 26.5, SFT 44.4.
+- Not directly comparable: they use reasoning-first output (<think>/<answer>, "solve this step by step") and self-consistency over 16–64 samples (Appendix B; Table 3 labeled SC). We use one greedy answer, no reasoning. Their Figure 1 doesn't state its decoding; most likely the same SC setup.
+- Their prompt comes from CSC-SQL; schema format not specified. SFT data: 916K synthetic examples with reasoning (SynSQL-Think-916K).
+- Decision: keep prompt v1. Report the protocol difference; compare gains, not absolute numbers.
+- Option (beyond MVP, decide in Week 4): also score the final model with self-consistency.
+- Their GRPO reward: execution (1) + 0.1 × format. No partial credit for wrong rows. GRPO: lr 3e-6, 6 rollouts, 1 epoch on BIRD train.
+
 ## 7. SFT
 
 ### Data (`scripts/build_sft_data.py` → `/workspace/sft_data`, not in repo)
