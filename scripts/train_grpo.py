@@ -60,6 +60,7 @@ config = GRPOConfig(
     # 2 x 24 = 48 answers per optimizer step = 8 questions x 6 answers
     per_device_train_batch_size=2,
     gradient_accumulation_steps=24,
+    generation_batch_size=12,            # generate 2 questions x 6 answers at a time (OOM at 48)
     num_generations=6,
     temperature=1.0,
     max_completion_length=512,
