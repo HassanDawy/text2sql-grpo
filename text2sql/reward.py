@@ -2,13 +2,16 @@
 
 Shared by TRL training and the verifiers environment (see NOTES section 8).
 """
+import warnings
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
 from text2sql.data import get_db_path, TRAIN_DB_DIR
 from text2sql.evaluate import extract_sql, execute_sql, rows_match
 
+
 TIMEOUT = 30.0
+GOLD_TIMEOUT = 120.0 
 WORKERS = 16
 
 
@@ -22,10 +25,15 @@ def resolve_db_path(db_id):
 
 @lru_cache(maxsize=None)
 def gold_rows(db_id, gold_sql):
-    """Run each gold query once and cache it."""
-    rows, err = execute_sql(resolve_db_path(db_id), gold_sql, TIMEOUT)
+    """Run each gold query once and cache it. None if it fails.
+
+    A failed gold gives every answer in the group the same reward (0), so the
+    advantages are all 0 and the question is effectively skipped, not mis-scored.
+    """
+    rows, err = execute_sql(resolve_db_path(db_id), gold_sql, GOLD_TIMEOUT)
     if err is not None:
-        raise ValueError("gold SQL failed on %s: %s" % (db_id, err))
+        warnings.warn("gold SQL failed on %s (%s); question skipped" % (db_id, err))
+        return None
     return rows
 
 
@@ -43,6 +51,8 @@ def score(text, db_id, gold_sql):
     if sql is None:
         return "no_sql", False
     gold = gold_rows(db_id, gold_sql)
+    if gold is None:
+        return "gold_error", False
     rows, err = execute_sql(resolve_db_path(db_id), sql, TIMEOUT)
     if err is not None:
         return ("timeout" if err == "timeout" else "error"), False
@@ -59,6 +69,10 @@ def _text(completion):
 
 def _score_batch(completions, db_id, gold_sql):
     args = list(zip([_text(c) for c in completions], db_id, gold_sql))
+    # Run each gold query once, one at a time, before the parallel part.
+    # Otherwise the 6 answers of a question start the same gold query 6 times at once.
+    for pair in dict.fromkeys(zip(db_id, gold_sql)):
+        gold_rows(*pair)
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         return list(pool.map(lambda a: score(*a), args))
 
