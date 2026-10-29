@@ -8,10 +8,12 @@ import os
 import sqlite3
 import time
 from collections import Counter
+from text2sql.data import BIRD_TRAIN_DIR, TRAIN_DB_DIR
 
-BIRD = os.environ["BIRD_DIR"]
-TRAIN_JSON = os.path.join(BIRD, "train", "train.json")
-DB_DIR = os.path.join(BIRD, "train", "train_databases")
+TRAIN_JSON = str(BIRD_TRAIN_DIR / "train.json")
+DB_DIR = str(TRAIN_DB_DIR)
+
+
 OUT = os.path.join("results", "trivial_gold_train.json")
 TIMEOUT = 30.0
 EXCLUDED_DBS = {"works_cycles"}
