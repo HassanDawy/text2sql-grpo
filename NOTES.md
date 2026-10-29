@@ -139,7 +139,14 @@
 - Risk: wrong_rows earns 0.1, so a trivially safe query can earn partial credit. Watch for wrong_rows rising while correct stays flat.
 - Risk: `SELECT 1` scored correct (1.0) on dev q0. The gold answer is (1.0,), and 1 == 1.0 in the set comparison (same as BIRD's official script).
 - Risk: gold answers that are empty match any query returning no rows.
-- To do before GRPO: count empty and single-0/1 gold answers on train.
+- Trivial gold answers on train (`scripts/count_trivial_gold.py`, 2026-10-29; ids = positions in train.json, in `results/trivial_gold_train.json`). Excluding works_cycles, 8,579 gold queries run:
+  - single 0 or 1: 297 (3.5%), matched by `SELECT 1` / `SELECT 0`
+  - empty: 276 (3.2%), matched by any query returning no rows
+  - single NULL: 45 (0.5%), matched by `SELECT NULL`
+  - total: 618 (7.2%). Counts are on the pool before the train/val split.
+  - Errors: 375 (385 including works_cycles) vs 377 in check_gold; the ~8 extra are likely queries near the 30 s timeout.
+- Interpretation: `SELECT 1` everywhere would average ~0.13 reward (3.5% correct + 0.1 elsewhere), far below honest answers, so global hacking is unlikely. The risk is local: on uncertain yes/no or "how many" questions a trivial answer can win, and with 0.1 for wrong_rows any query that runs earns at least as much as an honest attempt that errors.
+- Reward decision: pending. Options: (a) drop the 0.1, (b) drop the 618 trivial-gold questions from GRPO train only, (c) both. Dev stays untouched either way.
 
 ## 9. verifiers environment (`environments/bird_sql`)
 - verifiers v1 does not run on native Windows (imports `fcntl`). Develop and test on the pod.
@@ -185,8 +192,6 @@
 - `deactivate` before deleting an active venv, then `hash -r`.
 
 ## 13. Open items
-- Week 2: look at 20 SFT failures by hand; rerun scratch/column_errors.py on results/qwen_sft_dev.jsonl.
-- Count empty and single-0/1 gold answers on train (before GRPO).
 - End-to-end `vf-eval` run (Week 4).
 - Make the environment installable without the local `text2sql` package (Week 4).
 - SLM-SQL reports Qwen2.5-Coder-1.5B zero-shot 46.81% vs our 26.5% (SFT: 54.26% vs 44.4%). Find their prompt/schema format and explain the gap before the write-up. Compare final results to their SFT+RL (61.95%), not CSC-SQL (67.08%).
