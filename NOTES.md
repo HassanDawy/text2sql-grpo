@@ -191,6 +191,7 @@
 - The 100 GB volume filled up when installing vLLM ("Disk quota exceeded"). Deleted the BIRD zip files (all already extracted) to free space; use `pip install --no-cache-dir`.
 - vLLM lives in its own venv (/workspace/venv-vllm) because it pins its own PyTorch; training stays in /workspace/venv.
 - `deactivate` before deleting an active venv, then `hash -r`.
+- Pod migration (2026-10-29) emptied /workspace/venv; everything else survived. Rebuild: python3 -m venv /workspace/venv, then pip install --no-cache-dir torch==2.14.1 transformers==5.21.0 trl==1.16.0 peft==0.21.2 wandb "verifiers>=0.4.0", then pip install -e for the repo and environments/bird_sql.
 
 ## 13. Open items
 - End-to-end `vf-eval` run (Week 4).
