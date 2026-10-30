@@ -82,6 +82,7 @@ config = GRPOConfig(
     per_device_eval_batch_size=8,
     logging_steps=1 if args.smoke else 5,
     log_completions=True,
+    num_completions_to_print=2,          # console only; W&B still gets the full table
     save_strategy="no" if args.smoke else "steps",
     save_steps=50,
     save_total_limit=3,
