@@ -20,6 +20,8 @@ OUT_DIR = "/workspace/checkpoints/grpo_lora_r16"
 parser = argparse.ArgumentParser()
 parser.add_argument("--smoke", action="store_true",
                     help="10 steps on the longest prompts, 1 eval on 20 val questions, no W&B")
+parser.add_argument("--resume", action="store_true",
+                    help="continue from the latest checkpoint in OUT_DIR")
 args = parser.parse_args()
 
 load_dotenv()
@@ -60,7 +62,7 @@ config = GRPOConfig(
     # 2 x 24 = 48 answers per optimizer step = 8 questions x 6 answers
     per_device_train_batch_size=2,
     gradient_accumulation_steps=24,
-    generation_batch_size=12,            # generate 2 questions x 6 answers at a time (OOM at 48)
+    generation_batch_size=24,             # 4 questions x 6 answers per generate call (48 OOM'd)
     num_generations=6,
     temperature=1.0,
     max_completion_length=512,
@@ -81,7 +83,7 @@ config = GRPOConfig(
     logging_steps=1 if args.smoke else 5,
     log_completions=True,
     save_strategy="no" if args.smoke else "steps",
-    save_steps=100,
+    save_steps=50,
     save_total_limit=3,
     report_to="none" if args.smoke else "wandb",
     run_name="grpo-lora-r16-beta0.04",
@@ -101,7 +103,7 @@ trainer.model.print_trainable_parameters()
 
 # 4. Train
 start = time.monotonic()
-trainer.train()
+trainer.train(resume_from_checkpoint=True if args.resume else None)
 elapsed = time.monotonic() - start
 
 if args.smoke:
