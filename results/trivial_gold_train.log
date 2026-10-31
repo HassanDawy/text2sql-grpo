@@ -1,0 +1,22 @@
+SQLite 3.35.5
+500/9428 done, 7 min
+1000/9428 done, 8 min
+1500/9428 done, 13 min
+2000/9428 done, 13 min
+2500/9428 done, 19 min
+3000/9428 done, 19 min
+3500/9428 done, 27 min
+4000/9428 done, 29 min
+4500/9428 done, 29 min
+5000/9428 done, 29 min
+5500/9428 done, 31 min
+6000/9428 done, 36 min
+6500/9428 done, 38 min
+7000/9428 done, 46 min
+7500/9428 done, 46 min
+8000/9428 done, 48 min
+8500/9428 done, 50 min
+9000/9428 done, 51 min
+All train: {'other': 8384, 'error': 385, 'empty': 280, 'single_01': 330, 'single_null': 49}
+Excluding works_cycles: {'other': 7961, 'error': 375, 'empty': 276, 'single_01': 297, 'single_null': 45}
+Wrote results/trivial_gold_train.json
