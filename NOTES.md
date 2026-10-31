@@ -76,6 +76,14 @@
 - Challenging > moderate is likely noise (n = 145, about ±8 points)
 - Same generation settings as zero-shot; model = adapter merged into base (scripts/merge_lora.py)
 
+### Qwen2.5-Coder-1.5B-Instruct, SFT + GRPO (LoRA r16), BIRD dev, temperature 0, max 512 tokens (vLLM)
+- Execution accuracy: 47.5% (729/1,534); simple 54.7%, moderate 36.9%, challenging 35.9%
+- Status: 729 correct, 644 wrong_rows, 161 error
+- vs SFT: +3.1 points (+48 questions); errors 195 → 161 (−17%). Paired (McNemar): GRPO fixed 84, broke 36, p ≈ 1e-5.
+- 94% of GPT-4o-mini's accuracy (47.5 / 50.5)
+- Same generation settings as zero-shot and SFT; model = GRPO adapter merged onto the merged SFT model (scripts/merge_lora.py --base)
+- Not comparable to SLM-SQL's SFT→RL gain (54.26 → 61.95): they use reasoning output and self-consistency over 16–64 samples; we use one greedy answer.
+
 ## 6. Analysis
 
 ### Zero-shot Qwen error analysis (dev)
@@ -146,8 +154,18 @@
   - total: 618 (7.2%). Counts are on the pool before the train/val split.
   - Errors: 375 (385 including works_cycles) vs 377 in check_gold; the ~8 extra are likely queries near the 30 s timeout.
 - Interpretation: `SELECT 1` everywhere would average ~0.13 reward (3.5% correct + 0.1 elsewhere), far below honest answers, so global hacking is unlikely. The risk is local: on uncertain yes/no or "how many" questions a trivial answer can win, and with 0.1 for wrong_rows any query that runs earns at least as much as an honest attempt that errors.
-- Reward decision: pending. Options: (a) drop the 0.1, (b) drop the 618 trivial-gold questions from GRPO train only, (c) both. Dev stays untouched either way.
+- Reward decision (2026-10-29): GRPO reward = 1.0 if rows match, 0 otherwise (option a). Dropped the 0.1 for wrong_rows: it made any runnable query at least as good as an honest attempt that errors. Kept the 618 trivial-gold questions: they're legitimate questions with real 0/1/empty answers, and removing them would bias training against those answers. Matches SLM-SQL (no partial credit for wrong rows). Safety net: monitor trivial_rate during training.
+- `evaluate_one` stays unchanged (statuses still drive reporting); the GRPO reward lives in `text2sql/reward.py` (gold run once per question before parallel scoring, 120 s gold timeout, failed gold → question skipped via all-zero rewards).
 - GRPO settings (planned, 2026-10-29): num_generations 6, temperature 1.0, lr 1e-5 (LoRA; SLM-SQL used 3e-6 full fine-tune), beta 0.04 (DeepSeekMath value; keeps the model near SFT on what the reward doesn't check, resists drift toward trivial queries; reference = adapter disabled, no extra memory), num_iterations 1 (clip inactive), max_prompt_length 3072, max_completion_length 512, 1 epoch, eval on the 300 val examples (never dev). Monitor: reward vs val accuracy, train/kl, error_rate, trivial_rate, completion length.
+
+### GRPO run 1 (grpo-lora-r16-beta0.04, W&B run o56aq5j8, 2026-10-30)
+- Data: `scripts/build_grpo_data.py` reuses the SFT split (no reshuffle → no val leakage). 8,279 train / 300 val; dropped 8 gold queries that timed out in the trivial-gold run (ids 5, 6, 7, 115, 1108, 2108, 3148, 3168). Max prompt 3,016 tokens.
+- TRL 1.16 differences from the plan: no max_prompt_length setting (prompts never truncated); beta defaults to 0 (set 0.04 explicitly); loss_type defaults to "dapo" (kept: no length bias toward short answers like SELECT 1).
+- Batch: 2 × 24 accumulation = 48 answers (8 questions × 6) per step; generation_batch_size 24 (48 ran out of memory on the longest prompts; 12 fit at 9.1 GB, 24 at 14.8 GB). 1,035 steps, 13.7 h on a 4090 (~38–48 s/step).
+- Val accuracy (sampled, 2 answers per question): 0.57 at step 100 → 0.61 at 200 → ~0.64 by 700, then flat 0.61–0.64 (±2–3 points noise); final 0.63. Used `final`.
+- No reward hacking: trivial_rate flat at ~0.12 the whole run; error_rate fell from ~0.17 to a few percent.
+- Entropy collapse: entropy 0.105 → ~0.033 by step 400; frac_reward_zero_std 0.4 → ~0.75 (peaks 0.87). After ~step 400 only ~25% of groups carried signal, matching the val plateau. Most of the gain came in the first ~300–400 steps.
+- Possible follow-ups (beyond MVP): higher temperature or more generations per question to delay the collapse.
 
 ## 9. verifiers environment (`environments/bird_sql`)
 - verifiers v1 does not run on native Windows (imports `fcntl`). Develop and test on the pod.
@@ -197,3 +215,5 @@
 - End-to-end `vf-eval` run (Week 4).
 - Make the environment installable without the local `text2sql` package (Week 4).
 - SLM-SQL reports Qwen2.5-Coder-1.5B zero-shot 46.81% vs our 26.5% (SFT: 54.26% vs 44.4%). Find their prompt/schema format and explain the gap before the write-up. Compare final results to their SFT+RL (61.95%), not CSC-SQL (67.08%).
+- Rerun analysis scripts with --name grpo (error_counts, column_errors, sft_failures on the same 20 questions); look at the 36 questions SFT got right and GRPO broke.
+- Switch the verifiers environment's reward to text2sql/reward.py (it still wraps evaluate_one with 0.1 for wrong_rows).

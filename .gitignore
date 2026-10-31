@@ -4,3 +4,5 @@ __pycache__/
 /scratch
 .venv/
 *.egg-info/
+wandb/
+results/grpo_*.log
