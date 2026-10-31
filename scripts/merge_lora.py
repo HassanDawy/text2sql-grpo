@@ -5,9 +5,8 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-BASE = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
-
 p = argparse.ArgumentParser()
+p.add_argument("--base", default="Qwen/Qwen2.5-Coder-1.5B-Instruct")
 p.add_argument("--adapter", default="/workspace/checkpoints/sft_lora_r16/final")
 p.add_argument("--out", default="/workspace/models/sft_lora_r16_merged")
 args = p.parse_args()
