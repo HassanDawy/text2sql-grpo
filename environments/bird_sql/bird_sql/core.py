@@ -49,8 +49,15 @@ def extract_sql(text):
     return None if match is None else match.group(1).strip()
 
 
-def execute_sql(db_path, sql, timeout=30.0):
-    """Run SQL read-only with a wall-clock timeout. Returns (rows, None) or (None, error)."""
+MAX_ROWS = 100_000  # BIRD answers are small; a bigger result is wrong and could exhaust memory
+
+
+def execute_sql(db_path, sql, timeout=30.0, max_rows=MAX_ROWS):
+    """Run SQL read-only with a wall-clock timeout and a row cap.
+
+    Returns (rows, None), or (None, error) where error is "timeout", "too_many_rows",
+    or SQLite's message.
+    """
     conn = sqlite3.connect(Path(db_path).resolve().as_uri() + "?mode=ro", uri=True)
     start = time.monotonic()
     timed_out = False
@@ -64,7 +71,10 @@ def execute_sql(db_path, sql, timeout=30.0):
 
     conn.set_progress_handler(handler, 1000)
     try:
-        return conn.execute(sql).fetchall(), None
+        rows = conn.execute(sql).fetchmany(max_rows + 1)
+        if len(rows) > max_rows:
+            return None, "too_many_rows"
+        return rows, None
     except sqlite3.Error as e:
         return None, "timeout" if timed_out else str(e)
     finally:
@@ -89,6 +99,8 @@ def score(text, db_path, gold_rows, timeout=30.0):
     if sql is None:
         return "no_sql", False
     rows, err = execute_sql(db_path, sql, timeout)
+    if err == "too_many_rows":
+        return "wrong_rows", False  # runs, but far too many rows to be the answer
     if err is not None:
         return ("timeout" if err == "timeout" else "error"), False
     return ("correct" if rows_match(rows, gold_rows) else "wrong_rows"), is_trivial(rows)
