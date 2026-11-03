@@ -1,7 +1,7 @@
 [project]
 name = "bird-sql"
 version = "0.1.0"
-description = "bird-sql — <one-line description>."
+description = "BIRD text-to-SQL: execution-match reward with error and reward-hacking metrics."
 requires-python = ">=3.11"
 dependencies = ["verifiers"]
 
