@@ -168,15 +168,17 @@
 - Possible follow-ups (beyond MVP): higher temperature or more generations per question to delay the collapse.
 
 ## 9. verifiers environment (`environments/bird_sql`)
-- verifiers v1 does not run on native Windows (imports `fcntl`). Develop and test on the pod.
+- verifiers v1 (0.4.0) does not run on native Windows (imports `fcntl`). Develop and test on the pod.
 - Scaffolded with `vf-init bird-sql`; installed with `pip install -e environments/bird_sql`.
-- `TaskData.prompt` accepts a message list, so prompt v1 (`build_messages`) is used unchanged.
-- `BirdSqlData`: question_id, db_id, gold_sql, difficulty (None for train). Stores db_id, not db_path (paths are machine-specific).
-- Reward: wraps `evaluate_one`; runs it with `asyncio.to_thread` (blocking, up to 30 s); finds the database in the dev folder, then train (safe because no overlap); raises on gold_error instead of returning a number.
-- `load()`: split = dev | train; drops IDs listed in the split's failures file; optional num_tasks.
-- `text2sql` is not listed in the environment's dependencies (not on PyPI). Revisit for Week 4 publishing.
-- Checks passed: 1,534 dev tasks, 9,051 train tasks; reward gives correct/1.0, wrong_rows/0.1, no_sql/0 on both splits.
-- Not yet done: end-to-end `vf-eval` run with a real model (moved to Week 4).
+- Self-contained (2026-11-03): `bird_sql/core.py` copies the prompt v1 and evaluator code from `text2sql` (not on PyPI, and must stay Python 3.8; verifiers needs 3.11+). Keep the two in sync. The 377 train gold failures ship as `bird_sql/train_gold_failures.txt`.
+- Data: `--env.taskset.data-dir` or `$BIRD_DIR` (dev) / `$BIRD_TRAIN_DIR` (train), pointing at the BIRD split folder. `--env.taskset.num-tasks` for a subset.
+- `BirdSqlData`: question_id, db_id, db_path, gold_sql, difficulty (None for train).
+- Reward `execution_match`: 1 if rows match, else 0 (same as GRPO training). Metrics (`@vf.metric`, recorded, not summed): `error` (SQL error, timeout, no SQL), `trivial` (empty or single 0/1/NULL result), `gold_error` (gold query failed; answer scores 0, no crash). Reward and metrics run concurrently, so each answer is scored once and shared.
+- Gold rows cached per process; gold timeout 120 s, answers 30 s.
+- At most one SQL query per CPU core (container quota from cgroup v2 `cpu.max` or v1 `cpu.cfs_quota_us`; override with `BIRD_SQL_WORKERS`). A query waits for a slot before its timeout clock starts, so a busy machine queues instead of timing out. Found on a 0.5-core CPU pod: 16 parallel queries made valid gold queries time out.
+- Results capped at 100,000 rows (bigger = wrong_rows, never loaded). Found when a 512 MB CPU pod was OOM-killed scoring the GRPO outputs.
+- `scripts/check_env.py --name <run>` scores gold SQL and saved outputs through the environment, no model calls. On the 0.5-core pod: gold 1,533/1,534 (1 gold timeout at 120 s due to half a core). Rerun on a GPU pod pending: expect gold 1,534, GRPO 729 correct / 161 error.
+- Not yet done: end-to-end `vf-eval` run with a real model; environment README; Environments Hub.
 
 ## 10. Related environments (checked 2026-10-23)
 - verifiers v0.4.0 (Oct 2026) removed the v0 stack; our environment targets v1.
@@ -198,7 +200,7 @@
 - Set a volume disk; only `/workspace` persists. The container disk is wiped on stop, so reinstall tmux after each restart.
 - Use a venv in `/workspace` (system pip fails on Debian's PyJWT and is wiped on stop).
 - `/workspace/env.sh`: activates the venv; sets BIRD_DIR, HF_HOME, LD_LIBRARY_PATH (SQLite 3.35.5).
-- Network volume: `df` shows the whole storage cluster (e.g. 210T), not your quota.
+- `df`, `nproc` and `free` show the whole host (e.g. 210T disk, 128 cores, 503 GB RAM), not the pod's share. Real limits: cgroup files (`/sys/fs/cgroup/cpu.max` or `cpu/cpu.cfs_quota_us`; `memory/memory.limit_in_bytes`).
 - If the pod's GPU is taken, "Automatically migrate" moves the pod to a new machine; the volume data comes along.
 - Right after starting, the volume may not be fully mounted. If files look missing, wait a minute and check again.
 - BIRD zips contain `__MACOSX` junk folders; delete them.
@@ -209,11 +211,12 @@
 - The 100 GB volume filled up when installing vLLM ("Disk quota exceeded"). Deleted the BIRD zip files (all already extracted) to free space; use `pip install --no-cache-dir`.
 - vLLM lives in its own venv (/workspace/venv-vllm) because it pins its own PyTorch; training stays in /workspace/venv.
 - `deactivate` before deleting an active venv, then `hash -r`.
+- Our data is on the pod's own volume disk, not a network volume (Storage page shows none). It's tied to one machine: when its GPUs are taken, the pod can't start on GPU or migrate. Never Terminate it. Next pod: use a network volume.
+- "Start Pod using CPUs" works without a GPU but gives ~0.5 core and 512 MB RAM: fine for small checks, too small for full scoring runs.
+- Adapters backed up (2026-11-03) to private HF repos hdawy/text2sql-qwen1.5b-sft-lora and hdawy/text2sql-qwen1.5b-grpo-lora (`hf upload ... --private`; GRPO needs `--exclude README.md`, since its auto README lists a local base path). The GRPO adapter sits on the merged SFT model. Losing the pod means about 1 h of rebuilding, no retraining.
 - Pod migration (2026-10-29) emptied /workspace/venv; everything else survived. Rebuild: python3 -m venv /workspace/venv, then pip install --no-cache-dir torch==2.14.1 transformers==5.21.0 trl==1.16.0 peft==0.21.2 wandb "verifiers>=0.4.0", then pip install -e for the repo and environments/bird_sql.
 
 ## 13. Open items
-- End-to-end `vf-eval` run (Week 4).
-- Make the environment installable without the local `text2sql` package (Week 4).
+- Rerun check_env.py on a GPU pod; end-to-end `vf-eval` run (GRPO via vLLM, GPT-4o-mini); environment README; publish on the Environments Hub.
 - SLM-SQL reports Qwen2.5-Coder-1.5B zero-shot 46.81% vs our 26.5% (SFT: 54.26% vs 44.4%). Find their prompt/schema format and explain the gap before the write-up. Compare final results to their SFT+RL (61.95%), not CSC-SQL (67.08%).
 - Rerun analysis scripts with --name grpo (error_counts, column_errors, sft_failures on the same 20 questions); look at the 36 questions SFT got right and GRPO broke.
-- Switch the verifiers environment's reward to text2sql/reward.py (it still wraps evaluate_one with 0.1 for wrong_rows).
