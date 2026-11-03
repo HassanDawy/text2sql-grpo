@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+import threading
 from functools import lru_cache
 from pathlib import Path
 
@@ -19,6 +20,30 @@ GOLD_TIMEOUT = 120.0  # gold SQL: known to run, but slow on some SQLite versions
 TRAIN_GOLD_FAILURES = Path(__file__).parent / "train_gold_failures.txt"
 
 
+def available_cpus():
+    """CPU cores this process may use: the container's quota if there is one."""
+    try:  # cgroup v2
+        quota, period = open("/sys/fs/cgroup/cpu.max").read().split()
+        if quota != "max":
+            return max(1, int(int(quota) / int(period)))
+    except (OSError, ValueError):
+        pass
+    try:  # cgroup v1
+        quota = int(open("/sys/fs/cgroup/cpu/cpu.cfs_quota_us").read())
+        period = int(open("/sys/fs/cgroup/cpu/cpu.cfs_period_us").read())
+        if quota > 0:
+            return max(1, quota // period)
+    except (OSError, ValueError):
+        pass
+    return len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else (os.cpu_count() or 1)
+
+
+# At most one SQL query per core. Queries wait for a slot before their timeout clock
+# starts, so a busy machine queues work instead of turning slow queries into timeouts.
+SQL_WORKERS = int(os.environ.get("BIRD_SQL_WORKERS", available_cpus()))
+SQL_SLOTS = threading.BoundedSemaphore(SQL_WORKERS)
+
+
 @lru_cache(maxsize=None)
 def gold_rows(db_path, gold_sql):
     """Run each gold query once per process and cache it. None if it fails."""
@@ -30,10 +55,11 @@ def gold_rows(db_path, gold_sql):
 
 
 def score_answer(text, db_path, gold_sql):
-    gold = gold_rows(db_path, gold_sql)
-    if gold is None:
-        return "gold_error", False
-    return score(text, db_path, gold, SQL_TIMEOUT)
+    with SQL_SLOTS:
+        gold = gold_rows(db_path, gold_sql)
+        if gold is None:
+            return "gold_error", False
+        return score(text, db_path, gold, SQL_TIMEOUT)
 
 
 class BirdSqlData(vf.TaskData):
