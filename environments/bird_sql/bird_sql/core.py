@@ -49,11 +49,14 @@ def extract_sql(text):
     return None if match is None else match.group(1).strip()
 
 
-MAX_ROWS = 100_000  # BIRD answers are small; a bigger result is wrong and could exhaust memory
+# Row cap for the model's SQL: 10x the gold row count, at least 100,000. A result that
+# big can't be the answer, and loading it all could exhaust memory. Gold is never capped
+# (two BIRD dev gold answers in card_games return over 100,000 rows).
+MIN_ROW_CAP = 100_000
 
 
-def execute_sql(db_path, sql, timeout=30.0, max_rows=MAX_ROWS):
-    """Run SQL read-only with a wall-clock timeout and a row cap.
+def execute_sql(db_path, sql, timeout=30.0, max_rows=None):
+    """Run SQL read-only with a wall-clock timeout and an optional row cap.
 
     Returns (rows, None), or (None, error) where error is "timeout", "too_many_rows",
     or SQLite's message.
@@ -71,7 +74,10 @@ def execute_sql(db_path, sql, timeout=30.0, max_rows=MAX_ROWS):
 
     conn.set_progress_handler(handler, 1000)
     try:
-        rows = conn.execute(sql).fetchmany(max_rows + 1)
+        cursor = conn.execute(sql)
+        if max_rows is None:
+            return cursor.fetchall(), None
+        rows = cursor.fetchmany(max_rows + 1)
         if len(rows) > max_rows:
             return None, "too_many_rows"
         return rows, None
@@ -98,7 +104,8 @@ def score(text, db_path, gold_rows, timeout=30.0):
     sql = extract_sql(text)
     if sql is None:
         return "no_sql", False
-    rows, err = execute_sql(db_path, sql, timeout)
+    cap = max(MIN_ROW_CAP, 10 * len(gold_rows))
+    rows, err = execute_sql(db_path, sql, timeout, max_rows=cap)
     if err == "too_many_rows":
         return "wrong_rows", False  # runs, but far too many rows to be the answer
     if err is not None:

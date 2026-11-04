@@ -60,4 +60,17 @@ with open(ROOT / "results" / f"qwen_{args.name}_dev_raw.jsonl") as f:
         r = json.loads(line)
         raw[r["question_id"]] = r["output"]
 outputs = [raw[t.data.question_id] for t in tasks]
-report(f"{args.name} outputs", asyncio.run(run(outputs)))
+results = asyncio.run(run(outputs))
+report(f"{args.name} outputs", results)
+
+# Per-question comparison with the pipeline's scored file (score_generations.py)
+scored = {}
+with open(ROOT / "results" / f"qwen_{args.name}_dev.jsonl") as f:
+    for line in f:
+        r = json.loads(line)
+        scored[r["question_id"]] = r["status"] == "correct"
+diff = [(t.data.question_id, scored[t.data.question_id], bool(res[0]))
+        for t, res in zip(tasks, results) if scored[t.data.question_id] != bool(res[0])]
+print(f"disagreements with results/qwen_{args.name}_dev.jsonl: {len(diff)}")
+for qid, pipeline, env in diff:
+    print(f"  q{qid}: pipeline {'correct' if pipeline else 'wrong'}, env {'correct' if env else 'wrong'}")
