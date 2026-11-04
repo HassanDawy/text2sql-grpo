@@ -49,40 +49,30 @@ def extract_sql(text):
     return None if match is None else match.group(1).strip()
 
 
-# Row cap for the model's SQL: 10x the gold row count, at least 100,000. A result that
-# big can't be the answer, and loading it all could exhaust memory. Gold is never capped
-# (two BIRD dev gold answers in card_games return over 100,000 rows).
-MIN_ROW_CAP = 100_000
-
-
-def execute_sql(db_path, sql, timeout=30.0, max_rows=None):
-    """Run SQL read-only with a wall-clock timeout and an optional row cap.
-
-    Returns (rows, None), or (None, error) where error is "timeout", "too_many_rows",
-    or SQLite's message.
-    """
+def _connect(db_path, timeout):
+    """Read-only connection that aborts any query running longer than `timeout` seconds.
+    Returns (conn, timed_out) where timed_out() says whether the abort fired."""
     conn = sqlite3.connect(Path(db_path).resolve().as_uri() + "?mode=ro", uri=True)
     start = time.monotonic()
-    timed_out = False
+    state = {"timed_out": False}
 
     def handler():
-        nonlocal timed_out
         if time.monotonic() - start > timeout:
-            timed_out = True
+            state["timed_out"] = True
             return 1  # abort the query
         return 0
 
     conn.set_progress_handler(handler, 1000)
+    return conn, lambda: state["timed_out"]
+
+
+def execute_sql(db_path, sql, timeout=30.0):
+    """Run SQL read-only with a wall-clock timeout. Returns (rows, None) or (None, error)."""
+    conn, timed_out = _connect(db_path, timeout)
     try:
-        cursor = conn.execute(sql)
-        if max_rows is None:
-            return cursor.fetchall(), None
-        rows = cursor.fetchmany(max_rows + 1)
-        if len(rows) > max_rows:
-            return None, "too_many_rows"
-        return rows, None
+        return conn.execute(sql).fetchall(), None
     except sqlite3.Error as e:
-        return None, "timeout" if timed_out else str(e)
+        return None, "timeout" if timed_out() else str(e)
     finally:
         conn.close()
 
@@ -100,14 +90,41 @@ def is_trivial(rows):
 
 
 def score(text, db_path, gold_rows, timeout=30.0):
-    """Status of one answer: correct, wrong_rows, error, timeout, or no_sql; plus trivial."""
+    """Status of one answer: correct, wrong_rows, error, timeout, or no_sql; plus trivial.
+
+    Same result as fetching every row and comparing sets (BIRD's rule), but streams the
+    answer's rows: it stops at the first row that isn't in the gold set (the sets can't
+    be equal then), and otherwise only keeps rows that are in the gold set. So a query
+    returning millions of rows can't exhaust memory, and one returning millions of
+    duplicates of the right rows still scores correct.
+    """
     sql = extract_sql(text)
     if sql is None:
         return "no_sql", False
-    cap = max(MIN_ROW_CAP, 10 * len(gold_rows))
-    rows, err = execute_sql(db_path, sql, timeout, max_rows=cap)
-    if err == "too_many_rows":
-        return "wrong_rows", False  # runs, but far too many rows to be the answer
-    if err is not None:
-        return ("timeout" if err == "timeout" else "error"), False
-    return ("correct" if rows_match(rows, gold_rows) else "wrong_rows"), is_trivial(rows)
+    gold = set(gold_rows)
+    conn, timed_out = _connect(db_path, timeout)
+    try:
+        cursor = conn.execute(sql)
+        seen, n, first = set(), 0, None
+        while True:
+            chunk = cursor.fetchmany(10_000)
+            if not chunk:
+                break
+            for row in chunk:
+                n += 1
+                if n == 1:
+                    first = row
+                if row not in gold:
+                    single = n == 1 and len(chunk) == 1 and not cursor.fetchmany(1)
+                    return "wrong_rows", single and _trivial_row(first)
+                seen.add(row)
+    except sqlite3.Error as e:
+        return ("timeout" if timed_out() else "error"), False
+    finally:
+        conn.close()
+    trivial = n == 0 or (n == 1 and _trivial_row(first))
+    return ("correct" if seen == gold else "wrong_rows"), trivial
+
+
+def _trivial_row(row):
+    return len(row) == 1 and row[0] in (0, 1, None)
