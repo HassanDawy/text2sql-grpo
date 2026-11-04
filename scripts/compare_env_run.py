@@ -20,8 +20,12 @@ def last_assistant(obj):
 
     def walk(x):
         if isinstance(x, dict):
-            if x.get("role") == "assistant" and isinstance(x.get("content"), str):
-                found.append(x["content"])
+            if x.get("role") == "assistant":
+                c = x.get("content")
+                if isinstance(c, list):  # content parts: [{"type": "text", "text": ...}]
+                    c = "".join(p.get("text", "") for p in c if isinstance(p, dict))
+                if isinstance(c, str) and c:
+                    found.append(c)
             for v in x.values():
                 walk(v)
         elif isinstance(x, list):
@@ -41,8 +45,12 @@ def reward_of(rec):
 
 env = {}
 for line in open(run_dir / "traces.jsonl"):
-    rec = json.loads(line)
-    qid = rec["task"]["data"]["question_id"]
+    episode = json.loads(line)
+    # Each line is an episode holding a list of traces; use the scored one.
+    traces = episode.get("traces") or [episode]
+    rec = next((t for t in traces if t.get("rewards")), traces[-1])
+    task = rec.get("task") or episode.get("task")
+    qid = task["data"]["question_id"]
     reply = rec.get("root_reply")
     if reply is None:
         reply = last_assistant(rec.get("nodes")) or last_assistant(rec.get("calls"))
