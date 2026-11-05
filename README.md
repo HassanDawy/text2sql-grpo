@@ -4,15 +4,15 @@ An open-source RL environment and evaluation harness for text-to-SQL.
 
 This project fine-tunes a small open model (Qwen2.5-Coder-1.5B-Instruct) to translate plain-English questions into SQL, first with supervised fine-tuning (LoRA), then with GRPO using an execution-based reward: the model is rewarded when its query returns the same rows as the correct query.
 
-It reproduces and extends published GRPO text-to-SQL results ([SLM-SQL](https://arxiv.org/abs/2507.22478), [Arctic-Text2SQL-R1](https://huggingface.co/Snowflake/Arctic-Text2SQL-R1-7B)) on a student budget, and adds:
+It follows the recipe of published GRPO text-to-SQL work ([SLM-SQL](https://arxiv.org/abs/2507.22478), [Arctic-Text2SQL-R1](https://huggingface.co/Snowflake/Arctic-Text2SQL-R1-7B)) on a student budget: LoRA, a single consumer GPU, a direct prompt, and one greedy answer per question. It adds:
 
-- **Cost and serving benchmarks:** latency, throughput, and cost per query with vLLM, compared against GPT-4o-mini
-- **A held-out e-commerce test set:** ~200 hand-checked questions over a custom schema, never used in training, to test whether gains hold on unfamiliar data
-- **A verifiers v1 environment for BIRD:** the execution evaluator and reward packaged for Prime Intellect's verifiers library (in progress)
+- **A verifiers v1 environment for BIRD**, published on the Prime Intellect Environments Hub as [hdawy/bird-sql](https://app.primeintellect.ai/dashboard/environments/hdawy/bird-sql): the execution evaluator and binary reward used for GRPO training, with error and trivial-answer metrics for spotting reward hacking. Install with `prime env install hdawy/bird-sql`; details in [its README](environments/bird_sql/README.md).
+- **Cost and serving benchmarks** (planned): latency, throughput, and cost per query with vLLM, compared against GPT-4o-mini
+- **A held-out e-commerce test set** (planned): ~200 hand-checked questions over a custom schema, never used in training, to test whether gains hold on unfamiliar data
 
 ## Evaluation
 
-Execution accuracy on the [BIRD](https://bird-bench.github.io/) dev set (dev_20240627, 1,534 questions), broken down by difficulty, plus the e-commerce test set. The evaluator runs predicted and gold SQL read-only with a 30 s timeout, compares result sets, and records why each failure happened (no SQL found, SQL error, timeout, or wrong rows). Feeding the gold SQL back through the evaluator scores 1,534/1,534.
+Execution accuracy on the [BIRD](https://bird-bench.github.io/) dev set (dev_20240627, 1,534 questions), broken down by difficulty. The evaluator runs predicted and gold SQL read-only with a 30 s timeout, compares result sets, and records why each failure happened (no SQL found, SQL error, timeout, or wrong rows). Feeding the gold SQL back through the evaluator scores 1,534/1,534.
 
 All models use the same prompt and greedy decoding (temperature 0).
 
@@ -31,6 +31,14 @@ GRPO with an execution-only reward (1 if the rows match, else 0) adds 3.1 points
 
 The challenging split is small (145 questions, about ±8 points), so its numbers are noisy.
 
+These numbers are not directly comparable with SLM-SQL, which reports 61.95% for the same base model after SFT + RL, using reasoning-first prompts and self-consistency over 16–64 samples. This project uses a direct prompt and a single greedy answer.
+
+## Reproducing with the environment
+
+Running the GRPO model (served with vLLM) and GPT-4o-mini through the published environment with `vf-run` gives 47.8% and 50.8%, against 47.5% and 50.5% from this repo's own pipeline. The answer text is identical on 95% (GRPO) and 78% (GPT-4o-mini) of questions, and every identical answer gets the same score, so the remaining gap is decoding noise (`scripts/compare_env_run.py` does the per-question comparison). The command is in the [environment README](environments/bird_sql/README.md).
+
+One pitfall: `vllm serve` applies the sampling defaults in a model's `generation_config.json` unless started with `--generation-config vllm`. The merged models inherit Qwen's `repetition_penalty: 1.1`, which dropped the GRPO model to 45.5% even at temperature 0.
+
 ## Related environments
 
 Existing text-to-SQL environments on the Prime Intellect Environments Hub include [sql-single-turn](https://app.primeintellect.ai/dashboard/environments/stelioszach/sql-single-turn) (synthetic schemas) and [skyrl-sql](https://app.primeintellect.ai/dashboard/environments/primeintellect/skyrl-sql) (multi-turn, Spider). Both target the legacy verifiers v0 API; this project targets v1 and BIRD.
@@ -44,4 +52,4 @@ Existing text-to-SQL environments on the Prime Intellect Environments Hub includ
 - **TRL:** Hugging Face's library for SFT and GRPO training.
 - **verifiers:** Brown, *Verifiers: Environments for LLM Reinforcement Learning*, Prime Intellect, 2025.
 
-**Status:** in progress. Results are added as each stage completes.
+**Status:** SFT, GRPO and the environment are done. Cost/serving benchmarks and the e-commerce test set are next.
