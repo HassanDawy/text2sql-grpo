@@ -3,7 +3,7 @@ name = "bird-sql"
 version = "0.1.0"
 description = "BIRD text-to-SQL: execution-match reward with error and reward-hacking metrics."
 requires-python = ">=3.11"
-dependencies = ["verifiers"]
+dependencies = ["verifiers>=0.4.1"]
 
 [build-system]
 requires = ["hatchling"]
