@@ -29,6 +29,8 @@ The zero-shot Qwen model's main failure mode is SQL that doesn't run (47% of ans
 
 GRPO with an execution-only reward (1 if the rows match, else 0) adds 3.1 points on top of SFT, reaching 94% of GPT-4o-mini. The gain is significant in a paired test (84 questions fixed vs 36 broken, McNemar p ≈ 1e-5), errors drop another 17%, and the share of trivial answers (`SELECT 1`-style) stays flat throughout training, so the gain doesn't come from gaming the reward. Most of it arrives in the first ~400 of 1,035 steps; after that the model's outputs become nearly deterministic, and most groups of sampled answers stop carrying a learning signal.
 
+Most of the gain comes from queries that already ran but returned the wrong rows (59 fixed), plus 25 fixed errors. 36 previously correct answers broke, mostly into wrong rows; checked by hand, about 9 of those are benchmark issues, ambiguous questions or SFT luck, and most of the rest are schema-grounding mistakes (wrong table, join or column). That is also the model's main remaining weakness: 113 of its 161 errors reference a real column through the wrong table.
+
 The challenging split is small (145 questions, about ±8 points), so its numbers are noisy.
 
 These numbers are not directly comparable with SLM-SQL, which reports 61.95% for the same base model after SFT + RL, using reasoning-first prompts and self-consistency over 16–64 samples. This project uses a direct prompt and a single greedy answer.

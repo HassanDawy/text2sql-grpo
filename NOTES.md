@@ -94,7 +94,7 @@
   - 2 miss quotes
 - Other errors: 28 no such function, 14 ambiguous column, 8 no such table, ~30 syntax.
 - Takeaway: schema grounding (which table owns which column) is the main failure, not SQL syntax.
-- Re-run `scratch/column_errors.py` on SFT outputs to see what changes.
+- Script: analysis/column_errors.py --name zeroshot|sft|grpo.
 
 ### SFT error analysis (dev)
 - 195 errors: 171 no such column, 13 no such table, 8 near "order" (likely an unquoted table named `order`), 2 no such function, 1 other.
@@ -107,7 +107,29 @@
 - 9 model mistakes: 4 schema/join, 3 ignored hint, 1 wrong aggregation, 1 date format (stored with time).
 - 2 ambiguous questions.
 - n = 20, so no percentage claims. Takeaway: part of wrong_rows is benchmark noise; the model sometimes loses by following hints literally. Same noise exists in train, so it's also GRPO reward noise.
-- Script: scratch/sft_failures.py; labeled file: scratch/sft_failures.md.
+- Script: analysis/sft_failures.py; labeled file: analysis/sft_failures.md.
+
+### GRPO error analysis (dev)
+- 161 errors: 133 no such column, 9 no such table, 8 near "order", 6 no such function, 5 other.
+- no such column breakdown (SFT → GRPO): wrong table 150 → 113, wrong/invented name 14 → 13, mangled name 7 → 7.
+- Mix unchanged: wrong table is 85% of column errors (88% after SFT). Almost all of the error drop is wrong-table mistakes.
+
+### SFT → GRPO transitions (dev, analysis/transitions.py)
+| SFT ↓ / GRPO → | correct | wrong_rows | error |
+| --- | --- | --- | --- |
+| correct (681) | 645 | 30 | 6 |
+| wrong_rows (658) | 59 | 565 | 34 |
+| error (195) | 25 | 49 | 121 |
+- Fixed 84: 59 from wrong_rows, 25 from errors. Broken 36: 30 to wrong_rows, 6 to errors.
+- 74 SFT errors left the error state, but only 25 became correct; 49 now run but return wrong rows. 40 new errors appeared (34 from wrong_rows, 6 from correct). Not reward hacking: wrong_rows earns 0, the same as an error.
+- 645 of SFT's 681 correct answers stay correct.
+- Any two models disagree on some questions by chance: individual cells are directions; the net +48 is what McNemar tests.
+
+### SFT correct → GRPO wrong: all 36 by hand (analysis/grpo_broken.md)
+- First-pass labels by Claude, spot-checked by Hassan: wrong table/join 10, wrong column 4, value format 4, ignored question 3, over-complicated 3, grouping/DISTINCT 2, ignored hint 1; benchmark issue 4, ambiguous 4, lucky SFT 1. n = 36, counts only.
+- ~27 real model mistakes, mostly schema grounding (14 wrong table/join/column): the same weakness as the remaining errors. ~9 are not real regressions.
+- GRPO follows hints more literally, even wrong ones: q964 ('America' vs data 'American'), q991 (copied the hint's typo 'forname'), q1458 (hint contradicts gold). 3 cases: an observation, not a finding.
+- A few invented constants: q862 (raceId = 11 instead of year 2007), q481 ('Commander 2010'), q1479 (LIKE '%CZK').
 
 ### Comparison with SLM-SQL (paper setup, read 2026-10-28)
 - SLM-SQL Qwen2.5-Coder-1.5B on BIRD dev: zero-shot 46.81, SFT 54.26, SFT+RL 61.95, +CSC-SQL 67.08. Ours: zero-shot 26.5, SFT 44.4.
@@ -191,8 +213,7 @@
 - Stretch goal is not novel: multi-turn RL text-to-SQL exists (SkyRL-SQL and its Hub env).
 
 ## 11. Repo and environments
-- Layout: `text2sql/` (data.py, evaluate.py) + `scripts/` + `environments/` + `results/`; `scratch/` gitignored.
-- Editable install via `pyproject.toml` (`pip install -e .`).
+- Layout: `text2sql/` (data.py, evaluate.py) + `scripts/` + `analysis/` + `environments/` + `results/`; `scratch/` gitignored.- Editable install via `pyproject.toml` (`pip install -e .`).
 - Laptop venv: Python 3.8.10, SQLite 3.35.5. Used for all scoring.
 - Pod venv (`/workspace/venv`): Python 3.12.3. Used for verifiers and training.
 - `text2sql/` must stay Python 3.8-compatible (laptop imports it).
@@ -220,6 +241,5 @@
 - Pod migration (2026-10-29) emptied /workspace/venv; everything else survived. Rebuild: python3 -m venv /workspace/venv, then pip install --no-cache-dir torch==2.14.1 transformers==5.21.0 trl==1.16.0 peft==0.21.2 wandb "verifiers>=0.4.0", then pip install -e for the repo and environments/bird_sql.
 
 ## 13. Open items
-- Environment README (what it is, reward and metrics, the vf-run command with null harness + subprocess runtime, `--generation-config vllm` warning, baselines, credit existing SQL envs); publish on the Environments Hub.
 - SLM-SQL reports Qwen2.5-Coder-1.5B zero-shot 46.81% vs our 26.5% (SFT: 54.26% vs 44.4%). Find their prompt/schema format and explain the gap before the write-up. Compare final results to their SFT+RL (61.95%), not CSC-SQL (67.08%).
-- Rerun analysis scripts with --name grpo (error_counts, column_errors, sft_failures on the same 20 questions); look at the 36 questions SFT got right and GRPO broke.
+- Optional, decide first: cost/serving benchmark (vLLM, needs the pod), e-commerce test set, self-consistency scoring.
