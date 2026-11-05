@@ -4,7 +4,7 @@ An open-source RL environment and evaluation harness for text-to-SQL.
 
 This project fine-tunes a small open model (Qwen2.5-Coder-1.5B-Instruct) to translate plain-English questions into SQL, first with supervised fine-tuning (LoRA), then with GRPO using an execution-based reward: the model is rewarded when its query returns the same rows as the correct query.
 
-It follows the recipe of published GRPO text-to-SQL work ([SLM-SQL](https://arxiv.org/abs/2507.22478), [Arctic-Text2SQL-R1](https://huggingface.co/Snowflake/Arctic-Text2SQL-R1-7B)) on a student budget: LoRA, a single consumer GPU, a direct prompt, and one greedy answer per question. It adds:
+It uses the same SFT-then-GRPO approach as published text-to-SQL work ([SLM-SQL](https://arxiv.org/abs/2507.22478), [Arctic-Text2SQL-R1](https://huggingface.co/Snowflake/Arctic-Text2SQL-R1-7B)) on a student budget: LoRA, a single consumer GPU, a direct prompt, and one greedy answer per question. It adds:
 
 - **A verifiers v1 environment for BIRD**, published on the Prime Intellect Environments Hub as [hdawy/bird-sql](https://app.primeintellect.ai/dashboard/environments/hdawy/bird-sql): the execution evaluator and binary reward used for GRPO training, with error and trivial-answer metrics for spotting reward hacking. Install with `prime env install hdawy/bird-sql`; details in [its README](environments/bird_sql/README.md).
 - **Cost and serving benchmarks** (planned): latency, throughput, and cost per query with vLLM, compared against GPT-4o-mini
